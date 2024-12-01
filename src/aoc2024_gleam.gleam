@@ -6,7 +6,7 @@ import gleam/option.{type Option, None, Some}
 import gleam/string
 
 import shared/parsers.{parse_bool}
-import shared/types.{type ProblemPart, part_from_int, part_to_int}
+import shared/types.{type ProblemPart, part_from_int}
 
 type Solver =
   fn() -> String
@@ -54,12 +54,9 @@ fn solution_mapper(day: Int, part: ProblemPart, example: Bool) -> Solver {
       int.to_string(day),
       "/",
       case example {
-        True -> "example."
-        False -> ""
+        True -> "example.txt"
+        False -> "real.txt"
       },
-      "part",
-      part |> part_to_int() |> int.to_string(),
-      ".txt",
     ])
 
   io.println(path)

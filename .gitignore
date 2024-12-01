@@ -2,4 +2,4 @@
 *.ez
 /build
 erl_crash.dump
-data/input/day*/part*.txt
+data/input/day*/real.txt

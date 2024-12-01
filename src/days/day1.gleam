@@ -1,5 +1,4 @@
 import gleam/int
-import gleam/io
 import gleam/list
 import gleam/string
 import shared/types.{type ProblemPart, Part1, Part2}
