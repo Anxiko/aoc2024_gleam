@@ -1,24 +1,13 @@
 # aoc2024_gleam
 
-[![Package Version](https://img.shields.io/hexpm/v/aoc2024_gleam)](https://hex.pm/packages/aoc2024_gleam)
-[![Hex Docs](https://img.shields.io/badge/hex-docs-ffaff3)](https://hexdocs.pm/aoc2024_gleam/)
-
-```sh
-gleam add aoc2024_gleam@1
-```
-```gleam
-import aoc2024_gleam
-
-pub fn main() {
-  // TODO: An example of the project in use
-}
-```
-
-Further documentation can be found at <https://hexdocs.pm/aoc2024_gleam>.
+Solutions to [Advent of Code 2024's challenges](https://adventofcode.com/2024), programmed in [Gleam](https://gleam.run/)
 
 ## Development
 
 ```sh
-gleam run   # Run the project
+gleam run day part sample # Usage
+gleam run 1 1 true  # Run day 1, part 1 challenge, with sample input
+gleam run 10 2 false  # Run day 10, part 2 challenge, with real input
+
 gleam test  # Run the tests
 ```
