@@ -50,7 +50,7 @@ fn solution_mapper(day: Int, part: ProblemPart, example: Bool) -> Solver {
 
   let path =
     string.concat([
-      "./data/day",
+      "./data/input/day",
       int.to_string(day),
       "/",
       case example {
