@@ -4,3 +4,4 @@ build/
 erl_crash.dump
 data/input/day*/real.txt
 data/expected_output/day*/real.json
+!data/expected_output/day0/*

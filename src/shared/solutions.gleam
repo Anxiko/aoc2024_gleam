@@ -1,6 +1,5 @@
 import days/day2
 import gleam/int
-import gleam/io
 import gleam/string
 
 import days/day1
@@ -30,8 +29,6 @@ pub fn solution_mapper(day: Int, part: ProblemPart, example: Bool) -> Solver {
         False -> "real.txt"
       },
     ])
-
-  io.println(path)
 
   fn() { base_solver(part, path) }
 }
