@@ -1,11 +1,12 @@
-import gleam/dict.{type Dict}
+import gleam/dict
 import gleam/int
 import gleam/list
-import gleam/option
 import gleam/result
 import gleam/string
 import shared/types.{type ProblemPart, Part1, Part2}
 import simplifile
+
+import shared/dicts.{freq}
 
 pub fn solve(part: ProblemPart, input_path: String) -> String {
   case part {
@@ -40,17 +41,6 @@ fn calculate_similarity(left: List(Int), right: List(Int)) -> Int {
     let count_right = freq_right |> dict.get(number) |> result.unwrap(0)
 
     acc + number * count_left * count_right
-  })
-}
-
-fn freq(numbers: List(Int)) -> Dict(Int, Int) {
-  numbers
-  |> list.fold(from: dict.new(), with: increment_freq)
-}
-
-fn increment_freq(d: Dict(Int, Int), number: Int) -> Dict(Int, Int) {
-  dict.upsert(d, number, with: fn(maybe_freq) {
-    option.unwrap(maybe_freq, 0) + 1
   })
 }
 

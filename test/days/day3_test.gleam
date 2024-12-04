@@ -1,4 +1,3 @@
-import shared/printing
 import gleam/list
 import gleeunit
 import gleeunit/should

@@ -1,7 +1,9 @@
 import gleam/int
 import gleam/list
 import gleam/option.{type Option, None, Some}
+import gleam/result
 import gleam/string
+import simplifile
 
 pub fn parse_bool(raw_bool) -> Option(Bool) {
   case raw_bool {
@@ -23,4 +25,14 @@ pub fn parse_sequence(
   line
   |> string.split(on: " ")
   |> list.map(parser)
+}
+
+pub fn read_lines(path: String) -> Result(List(String), Nil) {
+  let read_result =
+    path
+    |> simplifile.read()
+    |> result.map_error(fn(_) { Nil })
+
+  use contents <- result.map(read_result)
+  contents |> string.split("\n") |> list.filter(fn(s) { !string.is_empty(s) })
 }

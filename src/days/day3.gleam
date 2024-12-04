@@ -1,14 +1,13 @@
 import gleam/int
 import gleam/io
 import gleam/list
-import gleam/option.{Some, None}
+import gleam/option.{None, Some}
 import gleam/regexp
 import gleam/result
 import gleam/string
 import simplifile
 
 import shared/types.{type ProblemPart, Part1, Part2}
-import shared/printing
 
 pub type Instruction {
   Mul(Int, Int)
