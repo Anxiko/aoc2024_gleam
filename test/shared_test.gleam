@@ -4,7 +4,7 @@ import gleeunit
 import gleeunit/should
 
 import shared/expected.{Parts, decode_expected_output, read_expected}
-import shared/lists.{delete_at}
+import shared/lists.{delete_at, split_many}
 
 const list = [3, 5, 2, 0, 4, 7, 5]
 
@@ -61,4 +61,34 @@ pub fn decode_expected_output_test() {
 pub fn read_expected_test() {
   should.equal(read_expected(0, True), Some(Parts(Some("0"), None)))
   should.equal(read_expected(0, False), Some(Parts(Some("1"), Some("2"))))
+}
+
+pub fn split_many_test() {
+  should.equal(
+    split_many(
+      [1, 2, 3, 0, 4, 5, 6, 0],
+      by: fn(e) { e == 0 },
+      discard_splitter: True,
+    ),
+    [[1, 2, 3], [4, 5, 6], []],
+  )
+
+  should.equal(
+    split_many(
+      [1, 2, 3, 0, 4, 5, 6, 0],
+      by: fn(e) { e == 0 },
+      discard_splitter: False,
+    ),
+    [[1, 2, 3], [0, 4, 5, 6], [0]],
+  )
+
+  should.equal(
+    split_many([], by: fn(e) { e == 0 }, discard_splitter: False),
+    [],
+  )
+
+    should.equal(
+    split_many([0], by: fn(e) { e == 0 }, discard_splitter: False),
+    [[0]],
+  )
 }
