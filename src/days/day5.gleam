@@ -9,7 +9,6 @@ import gleam/string
 
 import shared/lists.{is_ordered, middle}
 import shared/parsers
-import shared/printing.{inspect}
 import shared/types.{type ProblemPart, Part1, Part2}
 
 type Input {
@@ -32,14 +31,14 @@ pub fn solve(part: ProblemPart, input_path: String) -> String {
   let #(correct, incorrect) =
     input.updates
     |> list.partition(fn(update) {
-      is_ordered(update, fn(l, r) { compare_by_ruledict(l, r, rule_dict) })
+      is_ordered(update, fn(l, r) { compare_by_rule_dict(l, r, rule_dict) })
     })
 
   let selected_updates = case part {
     Part1 -> correct
     Part2 -> {
       incorrect
-      |> list.map(list.sort(_, fn(l, r) { compare_by_ruledict(l, r, rule_dict) }))
+      |> list.map(list.sort(_, fn(l, r) { compare_by_rule_dict(l, r, rule_dict) }))
     }
   }
 
@@ -63,20 +62,20 @@ fn build_rule_dict(rules: List(Rule)) -> RuleDict {
   })
 }
 
-fn compare_by_ruledict(left: Int, right: Int, rule_dict: RuleDict) -> Order {
+fn compare_by_rule_dict(left: Int, right: Int, rule_dict: RuleDict) -> Order {
   case left == right {
     True -> Eq
     False -> {
       case
-        less_then_by_ruledict(left, right, rule_dict),
-        less_then_by_ruledict(right, left, rule_dict)
+        less_then_by_rule_dict(left, right, rule_dict),
+        less_then_by_rule_dict(right, left, rule_dict)
       {
         True, False -> Lt
         False, True -> Gt
         False, False -> Eq
         True, True ->
           panic as string.concat([
-            "Both elements are greater than eachother: ",
+            "Both elements are greater than each other: ",
             int.to_string(left),
             ", ",
             int.to_string(right),
@@ -88,7 +87,7 @@ fn compare_by_ruledict(left: Int, right: Int, rule_dict: RuleDict) -> Order {
   }
 }
 
-fn less_then_by_ruledict(left: Int, right: Int, rule_dict: RuleDict) -> Bool {
+fn less_then_by_rule_dict(left: Int, right: Int, rule_dict: RuleDict) -> Bool {
   rule_dict
   |> dict.get(left)
   |> result.map(fn(greater_than_left) { set.contains(greater_than_left, right) })
