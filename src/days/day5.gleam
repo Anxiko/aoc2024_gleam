@@ -38,7 +38,9 @@ pub fn solve(part: ProblemPart, input_path: String) -> String {
     Part1 -> correct
     Part2 -> {
       incorrect
-      |> list.map(list.sort(_, fn(l, r) { compare_by_rule_dict(l, r, rule_dict) }))
+      |> list.map(list.sort(_, fn(l, r) {
+        compare_by_rule_dict(l, r, rule_dict)
+      }))
     }
   }
 

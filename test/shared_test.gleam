@@ -87,8 +87,7 @@ pub fn split_many_test() {
     [],
   )
 
-    should.equal(
-    split_many([0], by: fn(e) { e == 0 }, discard_splitter: False),
-    [[0]],
-  )
+  should.equal(split_many([0], by: fn(e) { e == 0 }, discard_splitter: False), [
+    [0],
+  ])
 }
