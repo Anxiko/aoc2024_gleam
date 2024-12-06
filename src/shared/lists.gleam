@@ -35,17 +35,23 @@ pub fn at(elements: List(t), idx: Int) -> Result(t, Nil) {
   }
 }
 
-pub fn write_at(elements: List(t), idx: Int, element: t) -> List(t) {
-  elements
-  |> with_index()
-  |> list.map(fn(pair) {
-    let #(i, e) = pair
+pub fn write_at(elements: List(t), idx: Int, element: t) -> Result(List(t), Nil) {
+  case 0 <= idx && idx < list.length(elements) {
+    True -> {
+      elements
+      |> with_index()
+      |> list.map(fn(pair) {
+        let #(i, e) = pair
 
-    case i == idx {
-      True -> element
-      False -> e
+        case i == idx {
+          True -> element
+          False -> e
+        }
+      })
+      |> Ok()
     }
-  })
+    False -> Error(Nil)
+  }
 }
 
 pub fn split_many(

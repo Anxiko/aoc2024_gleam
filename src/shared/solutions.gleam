@@ -6,6 +6,7 @@ import days/day2
 import days/day3
 import days/day4
 import days/day5
+import days/day6
 import shared/types.{type ProblemPart}
 
 pub type Solver =
@@ -18,6 +19,7 @@ pub fn solution_mapper(day: Int, part: ProblemPart, example: Bool) -> Solver {
     3 -> day3.solve
     4 -> day4.solve
     5 -> day5.solve
+    6 -> day6.solve
 
     unimplemented_day if 1 <= unimplemented_day && unimplemented_day <= 25 ->
       todo as "Day not implemented yet"

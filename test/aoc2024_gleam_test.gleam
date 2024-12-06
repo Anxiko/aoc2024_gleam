@@ -1,7 +1,9 @@
+import envoy
 import gleam/option.{type Option, None, Some}
-import gleam/yielder.{type Yielder}
+import gleam/result
 import gleeunit
 import gleeunit/should
+import shared/parsers
 import shared/types.{type ProblemPart, Part1, Part2}
 
 import shared/expected.{Parts, read_expected}
@@ -11,43 +13,85 @@ pub fn main() {
   gleeunit.main()
 }
 
-pub fn examples_test() {
-  use day <- yielder.each(days())
-  run_test(day, True)
+pub fn day1_test() {
+  run_test(day: 1, example: False, part1: True, part2: True)
+  run_test(day: 1, example: True, part1: True, part2: True)
 }
 
-pub fn reals_test() {
-  use day <- yielder.each(days())
-  run_test(day, False)
+pub fn day2_test() {
+  run_test(day: 2, example: False, part1: True, part2: True)
+  run_test(day: 2, example: True, part1: True, part2: True)
 }
 
-fn days() -> Yielder(Int) {
-  yielder.range(from: 1, to: 25)
+pub fn day3_test() {
+  run_test(day: 3, example: False, part1: True, part2: True)
+  run_test(day: 3, example: True, part1: True, part2: True)
 }
 
-fn run_test(day: Int, example: Bool) {
-  case read_expected(day, example) {
-    Some(Parts(part1: expected_part1, part2: expected_part2)) -> {
-      maybe_run_test(day, Part1, example, expected_part1)
-      maybe_run_test(day, Part2, example, expected_part2)
+pub fn day4_test() {
+  run_test(day: 4, example: False, part1: True, part2: True)
+  run_test(day: 4, example: True, part1: True, part2: True)
+}
+
+pub fn day5_test() {
+  run_test(day: 5, example: False, part1: True, part2: True)
+  run_test(day: 5, example: True, part1: True, part2: True)
+}
+
+pub fn day6_test() {
+  run_test(day: 6, example: False, part1: True, part2: True)
+  run_test(day: 6, example: True, part1: True, part2: True)
+}
+
+fn run_test(
+  day day: Int,
+  example example: Bool,
+  part1 part1: Bool,
+  part2 part2: Bool,
+) {
+  let must_run = example || should_run_real()
+
+  case must_run {
+    True -> {
+      let assert Some(Parts(part1: expected_part1, part2: expected_part2)) =
+        read_expected(day, example)
+      maybe_run_day_part(day, Part1, example, part1, expected_part1)
+      maybe_run_day_part(day, Part2, example, part2, expected_part2)
     }
-    _ -> Nil
+    False -> Nil
   }
 }
 
-fn maybe_run_test(
+fn maybe_run_day_part(
   day: Int,
   part: ProblemPart,
   example: Bool,
-  maybe_expected_output: Option(String),
+  must_run: Bool,
+  maybe_expected: Option(String),
 ) {
-  case maybe_expected_output {
-    Some(expected) -> {
-      let solver = solution_mapper(day, part, example)
-      let actual = solver()
-
-      should.equal(actual, expected)
+  case must_run, maybe_expected {
+    False, _ -> Nil
+    True, None -> should.fail()
+    True, Some(expected_part1) -> {
+      run_day_part(day, part, example, expected_part1)
     }
-    None -> Nil
   }
+}
+
+fn run_day_part(day: Int, part: ProblemPart, example: Bool, expected: String) {
+  let solver = solution_mapper(day, part, example)
+  let actual = solver()
+
+  should.equal(actual, expected)
+}
+
+fn should_run_real() -> Bool {
+  "AOC2024_RUN_REAL"
+  |> envoy.get()
+  |> result.try(fn(value) {
+    value
+    |> parsers.parse_bool()
+    |> option.to_result(Nil)
+  })
+  |> result.unwrap(False)
 }
