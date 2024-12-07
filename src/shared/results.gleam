@@ -7,7 +7,7 @@ pub fn expect(result: Result(t, e), msg msg: String) -> t {
       panic as string.concat([
         "Attempted to extract value from result in error: ",
         msg,
-        ", error:",
+        ", error: ",
         string.inspect(e),
       ])
     }

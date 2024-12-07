@@ -1,13 +1,14 @@
 import envoy
+import gleam/erlang/atom
 import gleam/option.{type Option, None, Some}
 import gleam/result
 import gleeunit
 import gleeunit/should
-import shared/parsers
-import shared/types.{type ProblemPart, Part1, Part2}
 
 import shared/expected.{Parts, read_expected}
+import shared/parsers
 import shared/solutions.{solution_mapper}
+import shared/types.{type ProblemPart, Part1, Part2}
 
 pub fn main() {
   gleeunit.main()
@@ -38,9 +39,13 @@ pub fn day5_test() {
   run_test(day: 5, example: True, part1: True, part2: True)
 }
 
-pub fn day6_test() {
-  run_test(day: 6, example: False, part1: True, part2: True)
-  run_test(day: 6, example: True, part1: True, part2: True)
+pub fn day6_test_() {
+  #(atom.create_from_string("timeout"), 10, [
+    fn() {
+      run_test(day: 6, example: False, part1: True, part2: True)
+      run_test(day: 6, example: True, part1: True, part2: True)
+    },
+  ])
 }
 
 pub fn day7_test() {
