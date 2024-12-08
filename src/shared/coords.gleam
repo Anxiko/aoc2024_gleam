@@ -9,6 +9,10 @@ pub fn add_coords(left: Coord, right: Coord) -> Coord {
   #(left.0 + right.0, left.1 + right.1)
 }
 
+pub fn sub_coords(left: Coord, right: Coord) -> Coord {
+  #(left.0 - right.0, left.1 - right.1)
+}
+
 pub fn deltas(
   cross include_cross: Bool,
   diagonal include_diagonal: Bool,
