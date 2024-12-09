@@ -92,3 +92,47 @@ pub fn middle(elements: List(t)) -> Result(t, Nil) {
     _, _ -> Error(Nil)
   }
 }
+
+pub type CutResult(t, s) {
+  Take(state: s)
+  TakeCut(taken: t, remaining: t)
+  Halt
+}
+
+pub fn cut_list(
+  elements: List(t),
+  state state: s,
+  cutter cutter: fn(t, s) -> CutResult(t, s),
+) -> #(List(t), List(t)) {
+  do_cut_list(elements, [], state, cutter)
+}
+
+fn do_cut_list(
+  remaining: List(t),
+  taken: List(t),
+  state: s,
+  cutter: fn(t, s) -> CutResult(t, s),
+) -> #(List(t), List(t)) {
+  case remaining {
+    [] -> #(list.reverse(taken), [])
+    [next, ..remaining] as all_remaining -> {
+      case cutter(next, state) {
+        Halt -> #(list.reverse(taken), all_remaining)
+        Take(s) -> do_cut_list(remaining, [next, ..taken], s, cutter)
+        TakeCut(remaining: remaining_element, taken: taken_element) -> {
+          #(list.reverse([taken_element, ..taken]), [
+            remaining_element,
+            ..remaining
+          ])
+        }
+      }
+    }
+  }
+}
+
+pub fn split_tail(elements: List(t)) -> Result(#(List(t), t), Nil) {
+  case list.reverse(elements) {
+    [last, ..rest] -> Ok(#(list.reverse(rest), last))
+    [] -> Error(Nil)
+  }
+}

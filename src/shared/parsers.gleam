@@ -38,6 +38,14 @@ pub fn read_lines(path: String) -> Result(List(String), Nil) {
   contents |> string.split("\n") |> list.filter(fn(s) { !string.is_empty(s) })
 }
 
+pub fn read_single_line(path: String) -> Result(String, Nil) {
+  use lines <- result.try(read_lines(path))
+  case lines {
+    [line] -> Ok(line)
+    _ -> Error(Nil)
+  }
+}
+
 pub fn read_line_chunks(path: String) -> Result(List(List(String)), Nil) {
   let read_result =
     path
