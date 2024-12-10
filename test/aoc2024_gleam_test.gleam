@@ -63,6 +63,11 @@ pub fn day9_test() {
   run_test(day: 9, example: True, part1: True, part2: True)
 }
 
+pub fn day10_test() {
+  run_test(day: 10, example: False, part1: True, part2: True)
+  run_test(day: 10, example: True, part1: True, part2: True)
+}
+
 fn run_test(
   day day: Int,
   example example: Bool,

@@ -48,6 +48,20 @@ pub fn cells(board: Board(cell)) -> List(#(Coord, cell)) {
   })
 }
 
+pub fn neighbours(
+  board: Board(cell),
+  pos: Coord,
+  diagonals include_diagonals: Bool,
+) -> List(#(Coord, cell)) {
+  coords.deltas(cross: True, diagonal: include_diagonals)
+  |> list.map(coords.add_coords(pos, _))
+  |> list.filter_map(fn(coord) {
+    board
+    |> read_coord(coord)
+    |> result.map(fn(cell) { #(coord, cell) })
+  })
+}
+
 pub fn is_valid_coord(board: Board(_), coord: Coord) -> Bool {
   let #(x, y) = coord
   0 <= x && x < board.width && 0 <= y && y < board.height
