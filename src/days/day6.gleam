@@ -182,8 +182,11 @@ pub fn roam_states_until_obstacle(
     _, board_limit -> #(board_limit, True)
   }
 
-  case count > 0 {
-    True -> {
+  case count, off_grid {
+    // Bumped into an obstacle, must turn
+    0, False -> #([#(pos, rotate_right(dir))], False)
+
+    count, off_grid -> {
       let states =
         pos
         |> next_coords(dir, count)
@@ -191,7 +194,6 @@ pub fn roam_states_until_obstacle(
 
       #(states, off_grid)
     }
-    False -> #([#(pos, rotate_right(dir))], False)
   }
 }
 
