@@ -40,12 +40,9 @@ pub fn day5_test() {
 }
 
 pub fn day6_test_() {
-  #(atom.create_from_string("timeout"), 10, [
-    fn() {
-      run_test(day: 6, example: False, part1: True, part2: True)
-      run_test(day: 6, example: True, part1: True, part2: True)
-    },
-  ])
+  use <- with_timeout(10)
+  run_test(day: 6, example: False, part1: True, part2: True)
+  run_test(day: 6, example: True, part1: True, part2: True)
 }
 
 pub fn day7_test() {
@@ -66,6 +63,18 @@ pub fn day9_test() {
 pub fn day10_test() {
   run_test(day: 10, example: False, part1: True, part2: True)
   run_test(day: 10, example: True, part1: True, part2: True)
+}
+
+pub fn day11_test_() {
+  run_test(day: 11, example: True, part1: True, part2: True)
+  run_test(day: 11, example: False, part1: True, part2: True)
+}
+
+fn with_timeout(
+  timeout: Int,
+  f: fn() -> Nil,
+) -> #(atom.Atom, Int, List(fn() -> Nil)) {
+  #(atom.create_from_string("timeout"), timeout, [f])
 }
 
 fn run_test(

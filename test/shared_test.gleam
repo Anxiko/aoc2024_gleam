@@ -2,6 +2,7 @@ import gleam/list
 import gleam/option.{None, Some}
 import gleeunit
 import gleeunit/should
+import shared/strings
 
 import shared/expected.{Parts, decode_expected_output, read_expected}
 import shared/lists.{delete_at, split_many}
@@ -90,4 +91,11 @@ pub fn split_many_test() {
   should.equal(split_many([0], by: fn(e) { e == 0 }, discard_splitter: False), [
     [0],
   ])
+}
+
+pub fn split_half_test() {
+  "aabb" |> strings.split_half() |> should.equal(Ok(#("aa", "bb")))
+  "" |> strings.split_half() |> should.equal(Ok(#("", "")))
+  "aacbb" |> strings.split_half |> should.be_error()
+  "1" |> strings.split_half |> should.be_error()
 }

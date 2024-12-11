@@ -1,13 +1,10 @@
 import gleam/int
 import gleam/list
 import gleam/result
-import gleam/string
-import shared/lists
 
 import shared/boards.{type Board}
 import shared/coords.{type Coord}
 import shared/parsers
-import shared/printing.{inspect}
 import shared/types.{type ProblemPart, Part1, Part2}
 
 type Path =
