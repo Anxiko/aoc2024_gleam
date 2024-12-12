@@ -65,9 +65,14 @@ pub fn day10_test() {
   run_test(day: 10, example: True, part1: True, part2: True)
 }
 
-pub fn day11_test_() {
+pub fn day11_test() {
   run_test(day: 11, example: True, part1: True, part2: True)
   run_test(day: 11, example: False, part1: True, part2: True)
+}
+
+pub fn day12_test() {
+  run_test(day: 12, example: True, part1: True, part2: True)
+  run_test(day: 12, example: False, part1: True, part2: True)
 }
 
 fn with_timeout(
