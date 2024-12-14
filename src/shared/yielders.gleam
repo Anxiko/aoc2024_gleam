@@ -25,3 +25,12 @@ pub fn get_next(elements: Yielder(t)) -> Result(#(t, Yielder(t)), Nil) {
     yielder.Done -> Error(Nil)
   }
 }
+
+pub fn product(
+  first_yielder: Yielder(a),
+  second_yielder: Yielder(b),
+) -> Yielder(#(a, b)) {
+  use first <- yielder.flat_map(first_yielder)
+  use second <- yielder.map(second_yielder)
+  #(first, second)
+}

@@ -1,3 +1,4 @@
+import gleam/int
 import gleam/list
 import gleam/order.{type Order, Eq, Gt, Lt}
 
@@ -140,4 +141,45 @@ pub fn split_tail(elements: List(t)) -> Result(#(List(t), t), Nil) {
 pub fn from_pair(pair: #(a, a)) -> List(a) {
   let #(first, second) = pair
   [first, second]
+}
+
+pub fn sub_list(elements: List(t), start start: Int, size size: Int) -> List(t) {
+  elements
+  |> list.drop(start)
+  |> list.take(size)
+}
+
+pub fn is_prefix(elements: List(t), prefix prefix: List(t)) -> Bool {
+  case elements, prefix {
+    _, [] -> True
+    [head, ..tail], [prefix_head, ..prefix_tail] if head == prefix_head ->
+      is_prefix(tail, prefix_tail)
+    _, _ -> False
+  }
+}
+
+pub fn max_consecutive(elements: List(t), element: t) -> Int {
+  do_max_consecutive(elements, element, 0, 0)
+}
+
+fn do_max_consecutive(
+  elements: List(t),
+  element: t,
+  current_count: Int,
+  max_count: Int,
+) -> Int {
+  case elements {
+    [] -> int.max(current_count, max_count)
+    [head, ..elements] if head == element -> {
+      do_max_consecutive(elements, element, current_count + 1, max_count)
+    }
+    [_head, ..elements] -> {
+      do_max_consecutive(
+        elements,
+        element,
+        0,
+        int.max(current_count, max_count),
+      )
+    }
+  }
 }

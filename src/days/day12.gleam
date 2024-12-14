@@ -1,15 +1,11 @@
 import gleam/int
-import gleam/io
 import gleam/list
 import gleam/pair
 import gleam/result
 import gleam/set.{type Set}
-import gleam/string
-import shared/printing
 
 import shared/boards.{type Board}
 import shared/coords.{type Coord}
-import shared/directions.{type Direction}
 import shared/pairs
 import shared/parsers
 import shared/sets
@@ -22,9 +18,6 @@ type MapPlot {
 type PlotData {
   PlotData(area: Int, perimeter: Int, coords: Set(Coord))
 }
-
-type State =
-  #(Direction, Coord)
 
 pub fn solve(part: ProblemPart, input_path: String) -> String {
   let assert Ok(board) = read_input(input_path)

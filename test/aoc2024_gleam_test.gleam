@@ -76,8 +76,15 @@ pub fn day12_test() {
 }
 
 pub fn day13_test() {
-  run_test(day: 12, example: True, part1: True, part2: False)
-  run_test(day: 12, example: False, part1: True, part2: False)
+  run_test(day: 13, example: True, part1: True, part2: True)
+  run_test(day: 13, example: False, part1: True, part2: True)
+}
+
+
+pub fn day14_test_() {
+  use <- with_timeout(10)
+  run_test(day: 14, example: True, part1: True, part2: False)
+  run_test(day: 14, example: False, part1: True, part2: True)
 }
 
 fn with_timeout(

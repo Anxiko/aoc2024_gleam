@@ -1,6 +1,7 @@
 import gleam/int
 import gleam/list
 import gleam/result
+import shared/results
 
 import shared/lists
 
@@ -44,4 +45,18 @@ pub fn parse(raw_x: String, raw_y: String) -> Result(Coord, Nil) {
   use x <- result.try(int.parse(raw_x))
   use y <- result.try(int.parse(raw_y))
   Ok(#(x, y))
+}
+
+pub fn wrap_around(coord: Coord, max: Coord) -> Coord {
+  let x =
+    coord.0
+    |> int.modulo(by: max.0)
+    |> results.assert_unwrap()
+
+  let y =
+    coord.1
+    |> int.modulo(by: max.1)
+    |> results.assert_unwrap()
+
+  #(x, y)
 }
