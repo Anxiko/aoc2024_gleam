@@ -136,3 +136,8 @@ pub fn split_tail(elements: List(t)) -> Result(#(List(t), t), Nil) {
     [] -> Error(Nil)
   }
 }
+
+pub fn from_pair(pair: #(a, a)) -> List(a) {
+  let #(first, second) = pair
+  [first, second]
+}

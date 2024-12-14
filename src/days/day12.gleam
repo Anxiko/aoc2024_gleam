@@ -1,12 +1,16 @@
 import gleam/int
+import gleam/io
 import gleam/list
 import gleam/pair
 import gleam/result
 import gleam/set.{type Set}
+import gleam/string
+import shared/printing
 
 import shared/boards.{type Board}
 import shared/coords.{type Coord}
 import shared/directions.{type Direction}
+import shared/pairs
 import shared/parsers
 import shared/sets
 import shared/types.{type ProblemPart, Part2}
@@ -28,7 +32,7 @@ pub fn solve(part: ProblemPart, input_path: String) -> String {
 
   board
   |> explore_map()
-  |> list.map(map_plot_cost(board, _, sides_discount))
+  |> list.map(map_plot_cost(_, sides_discount))
   |> int.sum()
   |> int.to_string()
 }
@@ -39,15 +43,12 @@ fn read_input(input_path: String) -> Result(Board(String), Nil) {
   Ok(board)
 }
 
-fn map_plot_cost(
-  board: Board(String),
-  map_plot: MapPlot,
-  discount sides_discount: Bool,
-) -> Int {
+fn map_plot_cost(map_plot: MapPlot, discount sides_discount: Bool) -> Int {
   case sides_discount {
     False -> map_plot.data.area * map_plot.data.perimeter
     True -> {
-      let sides = map_plot_sides(board, map_plot)
+      let sides = count_map_plot_corners(map_plot)
+
       map_plot.data.area * sides
     }
   }
@@ -149,119 +150,25 @@ fn update_plot_data(
   )
 }
 
-fn map_plot_sides(board: Board(String), map_plot: MapPlot) -> Int {
-  do_map_plot_sides(board, map_plot, set.new())
-}
-
-fn do_map_plot_sides(
-  board: Board(String),
-  map_plot: MapPlot,
-  traversed: Set(State),
-) -> Int {
-  case find_start(board, map_plot, traversed) {
-    Ok(start) -> {
-      let #(turns, path) = border_path(board, map_plot, start)
-      turns
-      + do_map_plot_sides(
-        board,
-        map_plot,
-        set.union(traversed, set.from_list(path)),
-      )
-    }
-    Error(Nil) -> 0
-  }
-}
-
-fn find_start(
-  board: Board(String),
-  map_plot: MapPlot,
-  visited: Set(State),
-) -> Result(#(Direction, Coord), Nil) {
+fn count_map_plot_corners(map_plot: MapPlot) -> Int {
   map_plot.data.coords
   |> set.to_list()
-  |> list.flat_map(fn(coord) {
-    directions.directions()
-    |> list.map(fn(dir) { #(dir, coord) })
+  |> list.map(count_coord_corners(map_plot, _))
+  |> int.sum()
+}
+
+fn count_coord_corners(map_plot: MapPlot, coord: Coord) -> Int {
+  coords.deltas(cross: False, diagonal: True)
+  |> list.count(fn(delta) {
+    let #(horizontal_in, vertical_in) =
+      delta
+      |> coords.decompose()
+      |> pairs.map_both(coords.add_coords(_, coord))
+      |> pairs.map_both(set.contains(map_plot.data.coords, _))
+
+    let diagonal_in =
+      delta |> coords.add_coords(coord) |> set.contains(map_plot.data.coords, _)
+
+    horizontal_in == vertical_in && { !diagonal_in || !horizontal_in }
   })
-  |> list.filter(fn(s) { !set.contains(visited, s) })
-  |> list.find(fn(dir_coord) {
-    let #(dir, coord) = dir_coord
-
-    dir
-    |> directions.rotate_left()
-    |> directions.to_delta()
-    |> coords.add_coords(coord)
-    |> boards.read_coord(board, _)
-    |> result.map(fn(other) { other != map_plot.cell })
-    |> result.unwrap(True)
-  })
-}
-
-fn border_path(
-  board: Board(String),
-  map_plot: MapPlot,
-  initial: State,
-) -> #(Int, List(State)) {
-  do_border_path(board, map_plot, initial, initial, 0, [])
-}
-
-fn do_border_path(
-  board: Board(String),
-  map_plot: MapPlot,
-  initial: State,
-  current: State,
-  turns: Int,
-  path: List(State),
-) -> #(Int, List(State)) {
-  case turns > 0 && initial == current {
-    True -> #(turns, path)
-    False -> {
-      let #(dir, coord) = current
-      let step_attempt =
-        can_step(board, map_plot, coord, directions.rotate_left(dir))
-        |> result.map(fn(state) { #(1, state) })
-        |> result.lazy_or(fn() {
-          can_step(board, map_plot, coord, dir)
-          |> result.map(fn(state) { #(0, state) })
-        })
-
-      case step_attempt {
-        Ok(#(new_turns, new_state)) ->
-          do_border_path(
-            board,
-            map_plot,
-            initial,
-            new_state,
-            turns + new_turns,
-            [new_state, ..path],
-          )
-        Error(Nil) -> {
-          let new_state = #(directions.rotate_right(dir), coord)
-
-          do_border_path(board, map_plot, initial, new_state, turns + 1, [
-            new_state,
-            ..path
-          ])
-        }
-      }
-    }
-  }
-}
-
-fn can_step(
-  board: Board(String),
-  map_plot: MapPlot,
-  coord: Coord,
-  dir: Direction,
-) -> Result(#(Direction, Coord), Nil) {
-  let next_coord =
-    dir
-    |> directions.to_delta()
-    |> coords.add_coords(coord)
-
-  use cell <- result.try(boards.read_coord(board, next_coord))
-  case cell == map_plot.cell {
-    True -> Ok(#(dir, next_coord))
-    False -> Error(Nil)
-  }
 }
