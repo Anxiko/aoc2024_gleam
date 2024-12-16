@@ -1,9 +1,9 @@
 import gleam/int
 import gleam/list
 import gleam/result
-import shared/results
 
 import shared/lists
+import shared/results
 
 pub type Coord =
   #(Int, Int)

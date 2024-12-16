@@ -37,3 +37,13 @@ pub fn rotate_left(dir: Direction) -> Direction {
 pub fn directions() -> List(Direction) {
   [Up, Right, Down, Left]
 }
+
+pub fn parse(char: String) -> Result(Direction, Nil) {
+  case char {
+    "^" -> Ok(Up)
+    ">" -> Ok(Right)
+    "v" -> Ok(Down)
+    "<" -> Ok(Left)
+    _ -> Error(Nil)
+  }
+}

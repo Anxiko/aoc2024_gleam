@@ -34,3 +34,10 @@ pub fn product(
   use second <- yielder.map(second_yielder)
   #(first, second)
 }
+
+pub fn tap(elements: Yielder(a), with tapper: fn(a) -> Nil) -> Yielder(a) {
+  yielder.map(elements, with: fn(e) {
+    tapper(e)
+    e
+  })
+}

@@ -62,6 +62,16 @@ pub fn cells(board: Board(cell)) -> List(#(Coord, cell)) {
   })
 }
 
+pub fn row_at(board: Board(cell), y y: Int) -> Result(List(cell), Nil) {
+  board.rows
+  |> lists.at(y)
+}
+
+pub fn column_at(board: Board(cell), x x: Int) -> Result(List(cell), Nil) {
+  board.rows
+  |> list.try_map(lists.at(_, x))
+}
+
 pub fn neighbours(
   board: Board(cell),
   pos: Coord,
@@ -198,6 +208,38 @@ pub fn is_sub_board(board: Board(c), sub_board: Board(c)) -> Bool {
       })
     }
   }
+}
+
+pub fn transform(
+  board: Board(cell),
+  acc: acc,
+  transformer: fn(acc, Coord, cell) -> #(acc, transformed),
+) -> #(acc, Board(transformed)) {
+  let #(acc, transformed_rows) =
+    board.rows
+    |> lists.with_index()
+    |> list.map_fold(acc, fn(acc, idx_row) {
+      let #(y, row) = idx_row
+      row
+      |> lists.with_index()
+      |> list.map_fold(acc, fn(acc, idx_cell) {
+        let #(x, cell) = idx_cell
+        transformer(acc, #(x, y), cell)
+      })
+    })
+
+  #(
+    acc,
+    Board(rows: transformed_rows, width: board.width, height: board.height),
+  )
+}
+
+pub fn map(board: Board(a), with mapper: fn(a) -> b) -> Board(b) {
+  let rows =
+    board.rows
+    |> list.map(list.map(_, mapper))
+
+  Board(rows:, width: board.width, height: board.height)
 }
 
 fn parse_row(
