@@ -1,4 +1,5 @@
 import gleam/string
+import gleam/result
 
 pub fn expect(result: Result(t, e), msg msg: String) -> t {
   case result {
@@ -23,5 +24,16 @@ pub fn assert_unwrap(result: Result(t, e)) -> t {
         string.inspect(e),
       ])
     }
+  }
+}
+
+pub fn guard(
+  result: Result(t, Nil),
+  predicate predicate: fn(t) -> Bool,
+) -> Result(t, Nil) {
+  use value <- result.try(result)
+  case predicate(value) {
+    True -> Ok(value)
+    False -> Error(Nil)
   }
 }

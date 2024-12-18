@@ -16,6 +16,11 @@ pub fn sub_coords(left: Coord, right: Coord) -> Coord {
   #(left.0 - right.0, left.1 - right.1)
 }
 
+pub fn manhattan(coord: Coord) -> Int {
+  let #(x, y) = coord
+  int.absolute_value(x) + int.absolute_value(y)
+}
+
 pub fn scalar(coord: Coord, coef: Int) -> Coord {
   let #(x, y) = coord
   #(coef * x, coef * y)

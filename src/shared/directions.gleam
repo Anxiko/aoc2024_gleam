@@ -47,3 +47,12 @@ pub fn parse(char: String) -> Result(Direction, Nil) {
     _ -> Error(Nil)
   }
 }
+
+pub fn to_string(dir: Direction) -> String {
+  case dir {
+    Up -> "^"
+    Right -> ">"
+    Down -> "v"
+    Left -> "<"
+  }
+}

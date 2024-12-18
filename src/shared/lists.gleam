@@ -162,6 +162,26 @@ pub fn max_consecutive(elements: List(t), element: t) -> Int {
   do_max_consecutive(elements, element, 0, 0)
 }
 
+pub fn unwrap(elements: List(t)) -> Result(t, Nil) {
+  case elements {
+    [element] -> Ok(element)
+    _ -> Error(Nil)
+  }
+}
+
+pub fn min(
+  elements: List(t),
+  by comparer: fn(t, t) -> order.Order,
+) -> Result(t, Nil) {
+  elements
+  |> list.reduce(fn(left, right) {
+    case comparer(left, right) {
+      order.Lt | order.Eq -> left
+      order.Gt -> right
+    }
+  })
+}
+
 fn do_max_consecutive(
   elements: List(t),
   element: t,

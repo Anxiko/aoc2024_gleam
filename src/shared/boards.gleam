@@ -242,6 +242,17 @@ pub fn map(board: Board(a), with mapper: fn(a) -> b) -> Board(b) {
   Board(rows:, width: board.width, height: board.height)
 }
 
+pub fn find_cell(board: Board(cell), cell: cell) -> List(Coord) {
+  board
+  |> cells()
+  |> list.filter_map(fn(pair) {
+    case pair {
+      #(this_coord, this_cell) if this_cell == cell -> Ok(this_coord)
+      _ -> Error(Nil)
+    }
+  })
+}
+
 fn parse_row(
   raw_row: String,
   cell_parser: fn(String) -> Result(cell, Nil),
