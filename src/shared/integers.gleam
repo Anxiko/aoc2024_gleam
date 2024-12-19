@@ -12,3 +12,12 @@ pub fn int_div(dividend: Int, divisor: Int) -> Result(Int, Nil) {
     _ -> Error(Nil)
   }
 }
+
+pub fn power(base: Int, exp exponent: Int) -> Int {
+  case base, exponent {
+    0, 0 -> panic as "Operation not defined"
+    _, 0 -> 1
+    base, 1 -> base
+    base, exponent -> base * power(base, exponent - 1)
+  }
+}

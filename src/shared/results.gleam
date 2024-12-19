@@ -1,5 +1,5 @@
-import gleam/string
 import gleam/result
+import gleam/string
 
 pub fn expect(result: Result(t, e), msg msg: String) -> t {
   case result {
@@ -33,6 +33,13 @@ pub fn guard(
 ) -> Result(t, Nil) {
   use value <- result.try(result)
   case predicate(value) {
+    True -> Ok(value)
+    False -> Error(Nil)
+  }
+}
+
+pub fn check(value: t, satisfies checker: fn(t) -> Bool) -> Result(t, Nil) {
+  case checker(value) {
     True -> Ok(value)
     False -> Error(Nil)
   }

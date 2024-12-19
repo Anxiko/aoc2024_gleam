@@ -1,3 +1,4 @@
+import gleam/int
 import gleam/result
 import gleam/yielder.{type Yielder}
 
@@ -40,4 +41,8 @@ pub fn tap(elements: Yielder(a), with tapper: fn(a) -> Nil) -> Yielder(a) {
     tapper(e)
     e
   })
+}
+
+pub fn count(start start: Int) -> Yielder(Int) {
+  yielder.iterate(start, int.add(_, 1))
 }
