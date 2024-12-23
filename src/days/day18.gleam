@@ -7,6 +7,7 @@ import gleam/pair
 import gleam/result
 import gleam/set.{type Set}
 import gleam/string
+import gleam/yielder.{type Yielder}
 
 import shared/boards.{type Board}
 import shared/coords.{type Coord}
@@ -28,35 +29,27 @@ type NodeInfo {
   NodeInfo(cost: Cost, previous: Set(Coord))
 }
 
-const board_size = 71
-
-const coords_limit = 1024
+type Input {
+  Input(coords: List(Coord), size: Int, obstacles: Int)
+}
 
 pub fn solve(part: ProblemPart, input_path: String) -> String {
-  let assert Ok(coords) = read_input(input_path)
+  let assert Ok(input) = read_input(input_path)
   case part {
     Part1 -> {
       let board =
-        coords
-        |> list.take(up_to: coords_limit)
+        input.coords
+        |> list.take(up_to: input.obstacles)
         |> list.fold(
-          boards.from_cell(False, width: board_size, height: board_size),
+          boards.from_cell(False, width: input.size, height: input.size),
           fn(board, coord) {
-            boards.write_coord(board, coord, True) |> results.assert_unwrap()
+            boards.write_coord(board, coord, True)
+            |> results.expect("Write coord")
           },
         )
 
-      board
-      |> boards.to_string(fn(is_wall) {
-        case is_wall {
-          True -> "#"
-          False -> "."
-        }
-      })
-      |> io.println()
-
       let start = #(0, 0)
-      let end = #(board_size - 1, board_size - 1)
+      let end = #(board.width - 1, board.height - 1)
 
       board
       |> a_star(start:, end:)
@@ -66,14 +59,28 @@ pub fn solve(part: ProblemPart, input_path: String) -> String {
   }
 }
 
-fn read_input(input_path: String) -> Result(List(Coord), Nil) {
-  use lines <- result.try(parsers.read_lines(input_path))
-  lines
-  |> list.try_map(fn(line) {
-    let split_line = string.split(line, ",")
-    use #(x, y) <- result.try(pairs.from_list(split_line))
-    coords.parse(x, y)
-  })
+fn read_input(input_path: String) -> Result(Input, Nil) {
+  let chunks = {
+    case parsers.read_line_chunks(input_path) {
+      Ok([[size, obstacles], coords]) -> Ok(#(size, obstacles, coords))
+      _ -> Error(Nil)
+    }
+  }
+
+  use #(size, obstacles, coords) <- result.try(chunks)
+  let coords =
+    coords
+    |> list.try_map(fn(line) {
+      let split_line = string.split(line, ",")
+      use #(x, y) <- result.try(pairs.from_list(split_line))
+      coords.parse(x, y)
+    })
+
+  use coords <- result.try(coords)
+  use size <- result.try(int.parse(size))
+  use obstacles <- result.try(int.parse(obstacles))
+
+  Input(coords:, size:, obstacles:) |> Ok()
 }
 
 fn a_star(board: Board(Bool), start initial: Coord, end target: Coord) -> Int {
@@ -86,47 +93,8 @@ fn a_star(board: Board(Bool), start initial: Coord, end target: Coord) -> Int {
       dict.from_list([#(initial, node_info)]),
       target,
     )
-    |> printing.inspect(label: "Node info mapping")
-
-  node_info_mapping
-  |> dict.to_list()
-  |> list.sort(by: fn(left, right) { coords.compare(left.0, right.0) })
-  |> list.map(fn(pair) {
-    let #(coord, NodeInfo(previous:, ..)) = pair
-    let previous =
-      previous
-      |> set.to_list()
-      |> list.sort(coords.compare)
-      |> list.map(coords.to_string)
-      |> string.join(", ")
-
-    string.concat([coords.to_string(coord), " <- ", previous])
-  })
-  |> list.each(io.println)
 
   check_walk_back(set.from_list([target]), set.new(), node_info_mapping)
-
-  // panic
-
-  // let paths = reconstruct_path(target, node_info_mapping)
-
-  // paths
-  // |> list.map(list.length)
-  // |> printing.inspect(label: "Path lengths")
-
-  // let assert Ok(path) = list.first(paths)
-
-  // board
-  // |> boards.map_pair(fn(pair) {
-  //   let #(coord, is_wall) = pair
-  //   case is_wall, list.contains(path, coord) {
-  //     True, _ -> "#"
-  //     False, True -> "O"
-  //     _, False -> "."
-  //   }
-  // })
-  // |> boards.to_string(function.identity)
-  // |> io.println()
 
   let final_node_info =
     dict.get(node_info_mapping, target) |> results.expect("Final response")
@@ -196,7 +164,7 @@ fn min_active(
     let node_info_mapping =
       node_info_mapping
       |> dict.get(neighbour)
-      |> results.assert_unwrap()
+      |> results.expect("Min active")
 
     #(neighbour, node_info_mapping.cost)
   })
@@ -234,26 +202,24 @@ fn heuristic(current: Coord, target: Coord) -> Int {
 fn reconstruct_path(
   target: Coord,
   node_info_mapping: Dict(Coord, NodeInfo),
-) -> List(Path) {
+) -> Yielder(Path) {
   do_reconstruct_path([target], node_info_mapping)
 }
 
 fn do_reconstruct_path(
   path: Path,
   node_info_mapping: Dict(Coord, NodeInfo),
-) -> List(Path) {
+) -> Yielder(Path) {
   let assert Ok(last) = list.first(path)
-
-  // printing.inspect(last, label: {path |> list.length() |> int.to_string()} <> " long path")
-
   let assert Ok(NodeInfo(previous: previous, ..)) =
     dict.get(node_info_mapping, last)
 
   case set.to_list(previous) {
-    [] -> [path]
+    [] -> yielder.single(path)
     previous -> {
       previous
-      |> list.flat_map(fn(next) {
+      |> yielder.from_list()
+      |> yielder.flat_map(fn(next) {
         case list.contains(path, next) {
           True ->
             panic as {
@@ -284,7 +250,7 @@ fn check_walk_back(
           let NodeInfo(previous: from_current, ..) =
             node_info_mapping
             |> dict.get(current)
-            |> results.assert_unwrap()
+            |> results.expect("Node info for " <> coords.to_string(current))
 
           case set.is_disjoint(seen, from_current) {
             False -> panic as { "Loop back from " <> coords.to_string(current) }
