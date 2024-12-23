@@ -8,6 +8,7 @@ import gleam/result
 import gleam/set.{type Set}
 import gleam/string
 import gleam/yielder.{type Yielder}
+import shared/integers
 
 import shared/boards.{type Board}
 import shared/coords.{type Coord}
@@ -56,30 +57,11 @@ pub fn solve(part: ProblemPart, input_path: String) -> String {
       |> int.to_string()
     }
     Part2 -> {
-      let board =
-        boards.from_cell(cell: False, width: input.size, height: input.size)
+      let breaking_point =
+        binary_search(input, min: 0, max: list.length(input.coords))
+      let #(x, y) =
+        lists.at(input.coords, breaking_point - 1) |> results.assert_unwrap()
 
-      let folded_result =
-        input.coords
-        |> lists.with_index()
-        |> list.try_fold(from: board, with: fn(board, pair) {
-          let #(idx, coord) = pair
-          io.println(
-            "Trying #" <> int.to_string(idx) <> ": " <> coords.to_string(coord),
-          )
-
-          let board_with_obstacle =
-            boards.write_coord(board, coord, True) |> results.assert_unwrap()
-          case a_star(board_with_obstacle, start:, end:) {
-            Ok(_) -> Ok(board_with_obstacle)
-            Error(Nil) -> Error(coord)
-          }
-        })
-
-      let #(x, y) = case folded_result {
-        Ok(_) -> panic as "Found a path after dropping all obstacles"
-        Error(coord) -> coord
-      }
       [x, y]
       |> list.map(int.to_string)
       |> string.join(",")
@@ -289,6 +271,43 @@ fn check_walk_back(
         })
         |> set.from_list()
       check_walk_back(next, set.union(current, seen), node_info_mapping)
+    }
+  }
+}
+
+fn with_n_obstacles(input: Input, n obstacles: Int) -> Board(Bool) {
+  let base_board =
+    boards.from_cell(cell: False, width: input.size, height: input.size)
+
+  input.coords
+  |> list.take(obstacles)
+  |> list.fold(from: base_board, with: fn(board, coord) {
+    board
+    |> boards.write_coord(coord, True)
+    |> results.assert_unwrap()
+  })
+}
+
+fn has_path(input: Input, n obstacles: Int) -> Bool {
+  let start = #(0, 0)
+  let end = #(input.size - 1, input.size - 1)
+
+  input
+  |> with_n_obstacles(n: obstacles)
+  |> a_star(start:, end:)
+  |> result.is_ok()
+}
+
+fn binary_search(input: Input, min min: Int, max max: Int) -> Int {
+  case min + 1 == max {
+    True -> max
+    False -> {
+      let middle = int.divide(min + max, 2) |> results.assert_unwrap()
+
+      case has_path(input, middle) {
+        True -> binary_search(input, min: middle, max:)
+        False -> binary_search(input, min:, max: middle)
+      }
     }
   }
 }
