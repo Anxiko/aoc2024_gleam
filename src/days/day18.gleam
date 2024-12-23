@@ -35,27 +35,55 @@ type Input {
 
 pub fn solve(part: ProblemPart, input_path: String) -> String {
   let assert Ok(input) = read_input(input_path)
+  let board =
+    boards.from_cell(cell: False, width: input.size, height: input.size)
+  let start = #(0, 0)
+  let end = #(input.size - 1, input.size - 1)
+
   case part {
     Part1 -> {
       let board =
         input.coords
         |> list.take(up_to: input.obstacles)
-        |> list.fold(
-          boards.from_cell(False, width: input.size, height: input.size),
-          fn(board, coord) {
-            boards.write_coord(board, coord, True)
-            |> results.expect("Write coord")
-          },
-        )
-
-      let start = #(0, 0)
-      let end = #(board.width - 1, board.height - 1)
+        |> list.fold(board, fn(board, coord) {
+          boards.write_coord(board, coord, True)
+          |> results.expect("Write coord")
+        })
 
       board
       |> a_star(start:, end:)
+      |> results.expect("A* part 1")
       |> int.to_string()
     }
-    Part2 -> todo
+    Part2 -> {
+      let board =
+        boards.from_cell(cell: False, width: input.size, height: input.size)
+
+      let folded_result =
+        input.coords
+        |> lists.with_index()
+        |> list.try_fold(from: board, with: fn(board, pair) {
+          let #(idx, coord) = pair
+          io.println(
+            "Trying #" <> int.to_string(idx) <> ": " <> coords.to_string(coord),
+          )
+
+          let board_with_obstacle =
+            boards.write_coord(board, coord, True) |> results.assert_unwrap()
+          case a_star(board_with_obstacle, start:, end:) {
+            Ok(_) -> Ok(board_with_obstacle)
+            Error(Nil) -> Error(coord)
+          }
+        })
+
+      let #(x, y) = case folded_result {
+        Ok(_) -> panic as "Found a path after dropping all obstacles"
+        Error(coord) -> coord
+      }
+      [x, y]
+      |> list.map(int.to_string)
+      |> string.join(",")
+    }
   }
 }
 
@@ -83,7 +111,11 @@ fn read_input(input_path: String) -> Result(Input, Nil) {
   Input(coords:, size:, obstacles:) |> Ok()
 }
 
-fn a_star(board: Board(Bool), start initial: Coord, end target: Coord) -> Int {
+fn a_star(
+  board: Board(Bool),
+  start initial: Coord,
+  end target: Coord,
+) -> Result(Int, Nil) {
   let cost = Cost(path: 0, total: heuristic(initial, target))
   let node_info = NodeInfo(cost:, previous: set.new())
   let node_info_mapping =
@@ -94,11 +126,9 @@ fn a_star(board: Board(Bool), start initial: Coord, end target: Coord) -> Int {
       target,
     )
 
-  check_walk_back(set.from_list([target]), set.new(), node_info_mapping)
-
-  let final_node_info =
-    dict.get(node_info_mapping, target) |> results.expect("Final response")
-  final_node_info.cost.total
+  node_info_mapping
+  |> dict.get(target)
+  |> result.map(fn(node_info) { node_info.cost.total })
 }
 
 fn do_a_star(

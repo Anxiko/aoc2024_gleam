@@ -134,7 +134,7 @@ pub fn to_string(board: Board(c), cell_formatter: fn(c) -> String) -> String {
   |> string.join("\n")
 }
 
-pub fn from_cell(cell: c, width width: Int, height height: Int) -> Board(c) {
+pub fn from_cell(cell cell: c, width width: Int, height height: Int) -> Board(c) {
   let rows =
     cell
     |> list.repeat(width)
