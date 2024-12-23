@@ -104,6 +104,8 @@ fn a_star(board: Board(Bool), start initial: Coord, end target: Coord) -> Int {
   })
   |> list.each(io.println)
 
+  check_walk_back(set.from_list([target]), set.new(), node_info_mapping)
+
   // panic
 
   // let paths = reconstruct_path(target, node_info_mapping)
@@ -240,9 +242,10 @@ fn do_reconstruct_path(
   path: Path,
   node_info_mapping: Dict(Coord, NodeInfo),
 ) -> List(Path) {
-  printing.inspect(path, label: "Path")
-
   let assert Ok(last) = list.first(path)
+
+  // printing.inspect(last, label: {path |> list.length() |> int.to_string()} <> " long path")
+
   let assert Ok(NodeInfo(previous: previous, ..)) =
     dict.get(node_info_mapping, last)
 
@@ -262,6 +265,34 @@ fn do_reconstruct_path(
           False -> do_reconstruct_path([next, ..path], node_info_mapping)
         }
       })
+    }
+  }
+}
+
+fn check_walk_back(
+  current: Set(Coord),
+  seen: Set(Coord),
+  node_info_mapping: Dict(Coord, NodeInfo),
+) {
+  case set.is_empty(current) {
+    True -> Nil
+    False -> {
+      let next =
+        current
+        |> set.to_list()
+        |> list.flat_map(fn(current) {
+          let NodeInfo(previous: from_current, ..) =
+            node_info_mapping
+            |> dict.get(current)
+            |> results.assert_unwrap()
+
+          case set.is_disjoint(seen, from_current) {
+            False -> panic as { "Loop back from " <> coords.to_string(current) }
+            True -> set.to_list(from_current)
+          }
+        })
+        |> set.from_list()
+      check_walk_back(next, set.union(current, seen), node_info_mapping)
     }
   }
 }
