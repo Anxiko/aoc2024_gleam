@@ -134,7 +134,7 @@ pub fn to_string(board: Board(c), cell_formatter: fn(c) -> String) -> String {
   |> string.join("\n")
 }
 
-pub fn from_cell(cell: c, width width: Int, height height: Int) -> Board(c) {
+pub fn from_cell(cell cell: c, width width: Int, height height: Int) -> Board(c) {
   let rows =
     cell
     |> list.repeat(width)
@@ -238,6 +238,27 @@ pub fn map(board: Board(a), with mapper: fn(a) -> b) -> Board(b) {
   let rows =
     board.rows
     |> list.map(list.map(_, mapper))
+
+  Board(rows:, width: board.width, height: board.height)
+}
+
+pub fn map_pair(board: Board(a), with mapper: fn(#(Coord, a)) -> b) -> Board(b) {
+  let rows =
+    board.rows
+    |> lists.with_index()
+    |> list.map(fn(pair) {
+      let #(y, row) = pair
+
+      row
+      |> lists.with_index()
+      |> list.map(fn(pair) {
+        let #(x, cell) = pair
+
+        let coord = #(x, y)
+
+        mapper(#(coord, cell))
+      })
+    })
 
   Board(rows:, width: board.width, height: board.height)
 }

@@ -1,6 +1,7 @@
-import days/day17
-import days/day16
 import days/day15
+import days/day16
+import days/day17
+import days/day18
 import gleam/int
 import gleam/string
 
@@ -42,6 +43,7 @@ pub fn solution_mapper(day: Int, part: ProblemPart, example: Bool) -> Solver {
     15 -> day15.solve
     16 -> day16.solve
     17 -> day17.solve
+    18 -> day18.solve
 
     unimplemented_day if 1 <= unimplemented_day && unimplemented_day <= 25 ->
       todo as "Day not implemented yet"

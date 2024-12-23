@@ -1,6 +1,8 @@
 import gleam/int
 import gleam/list
+import gleam/order.{type Order}
 import gleam/result
+import gleam/string
 
 import shared/lists
 import shared/results
@@ -64,4 +66,16 @@ pub fn wrap_around(coord: Coord, max: Coord) -> Coord {
     |> results.assert_unwrap()
 
   #(x, y)
+}
+
+pub fn compare(left: Coord, right: Coord) -> Order {
+  let x_compare = int.compare(left.0, right.0)
+  let y_compare = int.compare(left.1, right.1)
+
+  order.break_tie(x_compare, y_compare)
+}
+
+pub fn to_string(coord: Coord) -> String {
+  let #(x, y) = coord
+  string.concat(["(", int.to_string(x), ",", int.to_string(y), ")"])
 }
