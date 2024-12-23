@@ -11,3 +11,13 @@ pub fn split_half(s: String) -> Result(#(String, String), Nil) {
     _, _ -> Error(Nil)
   }
 }
+
+pub fn try_remove_prefix(
+  string string: String,
+  prefix prefix: String,
+) -> Result(String, Nil) {
+  case string.split_once(string, prefix) {
+    Ok(#("", without_prefix)) -> Ok(without_prefix)
+    _ -> Error(Nil)
+  }
+}
