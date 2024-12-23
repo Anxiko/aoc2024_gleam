@@ -1,26 +1,18 @@
 import gleam/dict.{type Dict}
-import gleam/function
 import gleam/int
-import gleam/io
 import gleam/list
 import gleam/pair
 import gleam/result
 import gleam/set.{type Set}
 import gleam/string
-import gleam/yielder.{type Yielder}
-import shared/integers
 
 import shared/boards.{type Board}
 import shared/coords.{type Coord}
 import shared/lists
 import shared/pairs
 import shared/parsers
-import shared/printing
 import shared/results
 import shared/types.{type ProblemPart, Part1, Part2}
-
-type Path =
-  List(Coord)
 
 type Cost {
   Cost(path: Int, total: Int)
@@ -209,70 +201,6 @@ fn heuristic(current: Coord, target: Coord) -> Int {
   target
   |> coords.sub_coords(current)
   |> coords.manhattan()
-}
-
-fn reconstruct_path(
-  target: Coord,
-  node_info_mapping: Dict(Coord, NodeInfo),
-) -> Yielder(Path) {
-  do_reconstruct_path([target], node_info_mapping)
-}
-
-fn do_reconstruct_path(
-  path: Path,
-  node_info_mapping: Dict(Coord, NodeInfo),
-) -> Yielder(Path) {
-  let assert Ok(last) = list.first(path)
-  let assert Ok(NodeInfo(previous: previous, ..)) =
-    dict.get(node_info_mapping, last)
-
-  case set.to_list(previous) {
-    [] -> yielder.single(path)
-    previous -> {
-      previous
-      |> yielder.from_list()
-      |> yielder.flat_map(fn(next) {
-        case list.contains(path, next) {
-          True ->
-            panic as {
-              "Next "
-              <> coords.to_string(next)
-              <> " is already in path "
-              <> string.join(list.map(path, coords.to_string), ", ")
-            }
-          False -> do_reconstruct_path([next, ..path], node_info_mapping)
-        }
-      })
-    }
-  }
-}
-
-fn check_walk_back(
-  current: Set(Coord),
-  seen: Set(Coord),
-  node_info_mapping: Dict(Coord, NodeInfo),
-) {
-  case set.is_empty(current) {
-    True -> Nil
-    False -> {
-      let next =
-        current
-        |> set.to_list()
-        |> list.flat_map(fn(current) {
-          let NodeInfo(previous: from_current, ..) =
-            node_info_mapping
-            |> dict.get(current)
-            |> results.expect("Node info for " <> coords.to_string(current))
-
-          case set.is_disjoint(seen, from_current) {
-            False -> panic as { "Loop back from " <> coords.to_string(current) }
-            True -> set.to_list(from_current)
-          }
-        })
-        |> set.from_list()
-      check_walk_back(next, set.union(current, seen), node_info_mapping)
-    }
-  }
 }
 
 fn with_n_obstacles(input: Input, n obstacles: Int) -> Board(Bool) {
