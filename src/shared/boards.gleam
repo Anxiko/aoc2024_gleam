@@ -242,6 +242,27 @@ pub fn map(board: Board(a), with mapper: fn(a) -> b) -> Board(b) {
   Board(rows:, width: board.width, height: board.height)
 }
 
+pub fn map_pair(board: Board(a), with mapper: fn(#(Coord, a)) -> b) -> Board(b) {
+  let rows =
+    board.rows
+    |> lists.with_index()
+    |> list.map(fn(pair) {
+      let #(y, row) = pair
+
+      row
+      |> lists.with_index()
+      |> list.map(fn(pair) {
+        let #(x, cell) = pair
+
+        let coord = #(x, y)
+
+        mapper(#(coord, cell))
+      })
+    })
+
+  Board(rows:, width: board.width, height: board.height)
+}
+
 pub fn find_cell(board: Board(cell), cell: cell) -> List(Coord) {
   board
   |> cells()

@@ -20,7 +20,7 @@ pub fn assert_unwrap(result: Result(t, e)) -> t {
     Ok(t) -> t
     Error(e) -> {
       panic as string.concat([
-        "Attempted to extract value from result in error, error:",
+        "Attempted to extract value from result in error: ",
         string.inspect(e),
       ])
     }

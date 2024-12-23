@@ -1,18 +1,24 @@
 import gleam/dict.{type Dict}
+import gleam/function
 import gleam/int
+import gleam/io
 import gleam/list
 import gleam/pair
 import gleam/result
 import gleam/set.{type Set}
 import gleam/string
-import shared/pairs
-import shared/parsers
 
 import shared/boards.{type Board}
 import shared/coords.{type Coord}
 import shared/lists
+import shared/pairs
+import shared/parsers
+import shared/printing
 import shared/results
 import shared/types.{type ProblemPart, Part1, Part2}
+
+type Path =
+  List(Coord)
 
 type Cost {
   Cost(path: Int, total: Int)
@@ -39,6 +45,16 @@ pub fn solve(part: ProblemPart, input_path: String) -> String {
             boards.write_coord(board, coord, True) |> results.assert_unwrap()
           },
         )
+
+      board
+      |> boards.to_string(fn(is_wall) {
+        case is_wall {
+          True -> "#"
+          False -> "."
+        }
+      })
+      |> io.println()
+
       let start = #(0, 0)
       let end = #(board_size - 1, board_size - 1)
 
@@ -63,16 +79,55 @@ fn read_input(input_path: String) -> Result(List(Coord), Nil) {
 fn a_star(board: Board(Bool), start initial: Coord, end target: Coord) -> Int {
   let cost = Cost(path: 0, total: heuristic(initial, target))
   let node_info = NodeInfo(cost:, previous: set.new())
-  let node_info =
+  let node_info_mapping =
     do_a_star(
       board,
       set.from_list([initial]),
       dict.from_list([#(initial, node_info)]),
       target,
     )
+    |> printing.inspect(label: "Node info mapping")
+
+  node_info_mapping
+  |> dict.to_list()
+  |> list.sort(by: fn(left, right) { coords.compare(left.0, right.0) })
+  |> list.map(fn(pair) {
+    let #(coord, NodeInfo(previous:, ..)) = pair
+    let previous =
+      previous
+      |> set.to_list()
+      |> list.sort(coords.compare)
+      |> list.map(coords.to_string)
+      |> string.join(", ")
+
+    string.concat([coords.to_string(coord), " <- ", previous])
+  })
+  |> list.each(io.println)
+
+  // panic
+
+  // let paths = reconstruct_path(target, node_info_mapping)
+
+  // paths
+  // |> list.map(list.length)
+  // |> printing.inspect(label: "Path lengths")
+
+  // let assert Ok(path) = list.first(paths)
+
+  // board
+  // |> boards.map_pair(fn(pair) {
+  //   let #(coord, is_wall) = pair
+  //   case is_wall, list.contains(path, coord) {
+  //     True, _ -> "#"
+  //     False, True -> "O"
+  //     _, False -> "."
+  //   }
+  // })
+  // |> boards.to_string(function.identity)
+  // |> io.println()
 
   let final_node_info =
-    dict.get(node_info, target) |> results.expect("Final response")
+    dict.get(node_info_mapping, target) |> results.expect("Final response")
   final_node_info.cost.total
 }
 
@@ -114,7 +169,6 @@ fn update_with_neighbour(
         NodeInfo(..node_info, previous: set.insert(previous, before_neighbour))
       let node_info_mapping =
         dict.insert(node_info_mapping, neighbour.0, node_info)
-      let active = set.insert(active, neighbour.0)
 
       #(active, node_info_mapping)
     }
@@ -160,10 +214,10 @@ fn neighbours(
 ) -> List(#(Coord, Cost)) {
   board
   |> boards.neighbours(current, diagonals: False)
-  |> list.filter(pair.second)
+  |> list.filter(fn(pair) { !pair.1 })
   |> list.map(pair.first)
   |> list.map(fn(neighbour) {
-    let h = heuristic(current, target)
+    let h = heuristic(neighbour, target)
     let cost = Cost(path: cost.path + 1, total: cost.path + 1 + h)
     #(neighbour, cost)
   })
@@ -173,4 +227,41 @@ fn heuristic(current: Coord, target: Coord) -> Int {
   target
   |> coords.sub_coords(current)
   |> coords.manhattan()
+}
+
+fn reconstruct_path(
+  target: Coord,
+  node_info_mapping: Dict(Coord, NodeInfo),
+) -> List(Path) {
+  do_reconstruct_path([target], node_info_mapping)
+}
+
+fn do_reconstruct_path(
+  path: Path,
+  node_info_mapping: Dict(Coord, NodeInfo),
+) -> List(Path) {
+  printing.inspect(path, label: "Path")
+
+  let assert Ok(last) = list.first(path)
+  let assert Ok(NodeInfo(previous: previous, ..)) =
+    dict.get(node_info_mapping, last)
+
+  case set.to_list(previous) {
+    [] -> [path]
+    previous -> {
+      previous
+      |> list.flat_map(fn(next) {
+        case list.contains(path, next) {
+          True ->
+            panic as {
+              "Next "
+              <> coords.to_string(next)
+              <> " is already in path "
+              <> string.join(list.map(path, coords.to_string), ", ")
+            }
+          False -> do_reconstruct_path([next, ..path], node_info_mapping)
+        }
+      })
+    }
+  }
 }
