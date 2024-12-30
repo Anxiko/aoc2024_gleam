@@ -79,3 +79,7 @@ pub fn to_string(coord: Coord) -> String {
   let #(x, y) = coord
   string.concat(["(", int.to_string(x), ",", int.to_string(y), ")"])
 }
+
+pub fn is_origin(coord: Coord) -> Bool {
+  coord == #(0, 0)
+}

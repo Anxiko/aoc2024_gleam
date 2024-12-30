@@ -2,6 +2,13 @@ import gleam/int
 import gleam/list
 import gleam/order.{type Order, Eq, Gt, Lt}
 
+pub fn tap(elements: List(a), with tapper: fn(a) -> b) -> List(a) {
+  elements
+  |> list.each(tapper)
+
+  elements
+}
+
 pub fn with_index(elements: List(a)) -> List(#(Int, a)) {
   elements
   |> list.index_map(fn(element, idx) { #(idx, element) })

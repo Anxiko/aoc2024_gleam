@@ -17,3 +17,7 @@ pub fn evolve_until(value: t, next next: fn(t) -> Result(t, Nil)) -> t {
     Error(Nil) -> value
   }
 }
+
+pub fn negated(predicate: fn(t) -> Bool) -> fn(t) -> Bool {
+  fn(x) { !predicate(x) }
+}

@@ -8,3 +8,7 @@ pub fn pop(s: Set(a)) -> Result(#(a, Set(a)), Nil) {
     [] -> Error(Nil)
   }
 }
+
+pub fn single(a) -> Set(a) {
+  set.from_list([a])
+}
