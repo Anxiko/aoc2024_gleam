@@ -12,3 +12,8 @@ pub fn from_list(list: List(t)) -> Result(#(t, t), Nil) {
     _ -> Error(Nil)
   }
 }
+
+pub fn to_list(pair: #(t, t)) -> List(t) {
+  let #(first, second) = pair
+  [first, second]
+}

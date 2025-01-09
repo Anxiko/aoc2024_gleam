@@ -117,6 +117,11 @@ pub fn day20_test_() {
   run_test(day: 20, example: False, part1: True, part2: True)
 }
 
+pub fn day21_test() {
+  run_test(day: 21, example: True, part1: True, part2: True)
+  run_test(day: 21, example: False, part1: True, part2: True)
+}
+
 fn with_timeout(
   timeout: Int,
   f: fn() -> Nil,
