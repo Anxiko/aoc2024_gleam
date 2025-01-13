@@ -1,6 +1,9 @@
 import gleam/int
 import gleam/list
 import gleam/order.{type Order, Eq, Gt, Lt}
+import gleam/otp/task
+import gleam/result
+import shared/results
 
 pub fn tap(elements: List(a), with tapper: fn(a) -> b) -> List(a) {
   elements
@@ -189,6 +192,19 @@ pub fn min(
   })
 }
 
+pub fn max(
+  elements: List(t),
+  by comparer: fn(t, t) -> order.Order,
+) -> Result(t, Nil) {
+  elements
+  |> list.reduce(fn(left, right) {
+    case comparer(left, right) {
+      order.Gt | order.Eq -> left
+      order.Lt -> right
+    }
+  })
+}
+
 fn do_max_consecutive(
   elements: List(t),
   element: t,
@@ -209,4 +225,39 @@ fn do_max_consecutive(
       )
     }
   }
+}
+
+pub fn prefixes(elements: List(t)) -> List(List(t)) {
+  do_prefixes(elements, [])
+}
+
+fn do_prefixes(remaining: List(t), acc: List(List(t))) -> List(List(t)) {
+  case remaining, acc {
+    [], acc -> acc
+    [next, ..remaining], [longest, ..] as acc -> {
+      do_prefixes(remaining, [[next, ..longest], ..acc])
+    }
+    [next, ..remaining], [] -> {
+      do_prefixes(remaining, [[next]])
+    }
+  }
+}
+
+pub fn suffixes(elements: List(t)) -> List(List(t)) {
+  elements
+  |> list.reverse()
+  |> prefixes()
+  |> list.map(list.reverse)
+}
+
+pub fn map_async(
+  elements: List(t),
+  with mapper: fn(t) -> r,
+  timeout timeout: Int,
+) -> List(r) {
+  elements
+  |> list.map(fn(element) { task.async(fn() { mapper(element) }) })
+  |> task.try_await_all(timeout)
+  |> result.all()
+  |> results.expect("Async mapping")
 }

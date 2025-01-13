@@ -122,6 +122,12 @@ pub fn day21_test() {
   run_test(day: 21, example: False, part1: True, part2: True)
 }
 
+pub fn day22_test_() {
+  use <- with_timeout(20)
+  run_test(day: 22, example: True, part1: True, part2: True)
+  run_test(day: 22, example: False, part1: True, part2: True)
+}
+
 fn with_timeout(
   timeout: Int,
   f: fn() -> Nil,
