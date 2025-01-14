@@ -1,4 +1,3 @@
-import shared/printing
 import gleam/dict.{type Dict}
 import gleam/int
 import gleam/list
@@ -94,6 +93,55 @@ fn update_node_info_mapping(
       let mapped_node_info = dict.insert(mapped_node_info, neighbour, node_info)
       let active = set.insert(active, neighbour)
       #(active, mapped_node_info)
+    }
+  }
+}
+
+pub fn bron_kerbosch(neighbours: Dict(node, Set(node))) -> List(Set(node)) {
+  do_bron_kerbosch(
+    set.new(),
+    neighbours |> dict.keys() |> set.from_list(),
+    set.new(),
+    neighbours,
+    [],
+  )
+}
+
+fn do_bron_kerbosch(
+  r current: Set(node),
+  p candidates: Set(node),
+  x excluded: Set(node),
+  g neighbours: Dict(node, Set(node)),
+  acc acc: List(Set(node)),
+) -> List(Set(node)) {
+  case set.is_empty(candidates), set.is_empty(excluded) {
+    True, True -> [current, ..acc]
+    True, False -> acc
+    False, _ -> {
+      let #(_candidates, _excluded, acc) =
+        candidates
+        |> set.to_list()
+        |> list.fold(#(candidates, excluded, acc), fn(state, candidate) {
+          let #(candidates, excluded, acc) = state
+          let candidate_neighbours =
+            neighbours |> dict.get(candidate) |> result.lazy_unwrap(set.new)
+          let acc =
+            do_bron_kerbosch(
+              set.insert(current, candidate),
+              set.intersection(candidates, candidate_neighbours),
+              set.intersection(excluded, candidate_neighbours),
+              neighbours,
+              acc,
+            )
+
+          #(
+            set.delete(candidates, candidate),
+            set.insert(excluded, candidate),
+            acc,
+          )
+        })
+
+      acc
     }
   }
 }

@@ -2,6 +2,7 @@ import gleam/int
 import gleam/list
 import gleam/order.{type Order, Eq, Gt, Lt}
 import gleam/otp/task
+import gleam/pair
 import gleam/result
 import shared/results
 
@@ -260,4 +261,22 @@ pub fn map_async(
   |> task.try_await_all(timeout)
   |> result.all()
   |> results.expect("Async mapping")
+}
+
+pub fn sort_by(
+  elements: List(t),
+  by key: fn(t) -> k,
+  with comparer: fn(k, k) -> order.Order,
+) -> List(t) {
+  elements
+  |> list.map(fn(element) { #(key(element), element) })
+  |> list.sort(fn(left, right) { comparer(left.0, right.0) })
+  |> list.map(pair.second)
+}
+
+pub fn split_head(elements: List(t)) -> Result(#(t, List(t)), Nil) {
+  case elements {
+    [head, ..tail] -> Ok(#(head, tail))
+    [] -> Error(Nil)
+  }
 }
