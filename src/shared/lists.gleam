@@ -280,3 +280,33 @@ pub fn split_head(elements: List(t)) -> Result(#(t, List(t)), Nil) {
     [] -> Error(Nil)
   }
 }
+
+pub fn find_delete(
+  elements: List(t),
+  by filter: fn(t) -> Bool,
+) -> Result(#(t, List(t)), Nil) {
+  do_find_delete(elements, filter, [])
+}
+
+fn do_find_delete(
+  elements: List(t),
+  filter: fn(t) -> Bool,
+  acc: List(t),
+) -> Result(#(t, List(t)), Nil) {
+  case elements {
+    [] -> Error(Nil)
+    [head, ..tail] -> {
+      case filter(head) {
+        True -> Ok(#(head, list.append(list.reverse(acc), tail)))
+        False -> do_find_delete(tail, filter, [head, ..acc])
+      }
+    }
+  }
+}
+
+pub fn positive_range(from from: Int, to to: Int) -> List(Int) {
+  case to >= from {
+    True -> list.range(from:, to:) |> list.filter(fn(n) { n >= 0 })
+    False -> []
+  }
+}
