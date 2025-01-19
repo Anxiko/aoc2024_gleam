@@ -1,4 +1,3 @@
-import days/day25
 import days/day15
 import days/day16
 import days/day17
@@ -9,6 +8,7 @@ import days/day21
 import days/day22
 import days/day23
 import days/day24
+import days/day25
 import gleam/int
 import gleam/string
 
