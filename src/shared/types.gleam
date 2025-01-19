@@ -1,5 +1,10 @@
 import gleam/option.{type Option, None, Some}
 
+pub type Either(left, right) {
+  Left(left)
+  Right(right)
+}
+
 pub type ProblemPart {
   Part1
   Part2

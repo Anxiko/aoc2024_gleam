@@ -1,3 +1,4 @@
+import days/day25
 import days/day15
 import days/day16
 import days/day17
@@ -56,9 +57,7 @@ pub fn solution_mapper(day: Int, part: ProblemPart, example: Bool) -> Solver {
     22 -> day22.solve
     23 -> day23.solve
     24 -> fn(part, input_path) { day24.solve(part, example, input_path) }
-
-    unimplemented_day if 1 <= unimplemented_day && unimplemented_day <= 25 ->
-      todo as "Day not implemented yet"
+    25 -> day25.solve
 
     _ -> panic as "Invalid day"
   }

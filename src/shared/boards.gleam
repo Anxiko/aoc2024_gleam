@@ -3,6 +3,7 @@ import gleam/list
 import gleam/result
 import gleam/string
 import gleam/yielder.{type Yielder}
+import shared/results
 import shared/yielders
 
 import shared/coords.{type Coord}
@@ -272,6 +273,25 @@ pub fn find_cell(board: Board(cell), cell: cell) -> List(Coord) {
       _ -> Error(Nil)
     }
   })
+}
+
+pub fn columns(board: Board(a)) -> List(Row(a)) {
+  case board.width {
+    0 -> []
+    width -> {
+      list.range(from: 0, to: width - 1)
+      |> list.map(fn(col) {
+        board.rows
+        |> list.map(fn(row) { lists.at(row, col) |> results.assert_unwrap() })
+      })
+    }
+  }
+}
+
+pub fn transpose(board: Board(a)) -> Board(a) {
+  board
+  |> columns()
+  |> from_rows()
 }
 
 fn parse_row(

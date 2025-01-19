@@ -4,7 +4,9 @@ import gleam/order.{type Order, Eq, Gt, Lt}
 import gleam/otp/task
 import gleam/pair
 import gleam/result
+
 import shared/results
+import shared/types.{type Either, Left, Right}
 
 pub fn tap(elements: List(a), with tapper: fn(a) -> b) -> List(a) {
   elements
@@ -286,6 +288,22 @@ pub fn find_delete(
   by filter: fn(t) -> Bool,
 ) -> Result(#(t, List(t)), Nil) {
   do_find_delete(elements, filter, [])
+}
+
+pub fn partition_map(
+  elements: List(a),
+  by mapper: fn(a) -> Either(left, right),
+) -> #(List(left), List(right)) {
+  elements
+  |> list.fold(#([], []), fn(acc, element) {
+    let #(lefts, rights) = acc
+    case mapper(element) {
+      Left(left) -> #([left, ..lefts], rights)
+      Right(right) -> #(lefts, [right, ..rights])
+    }
+  })
+  |> pair.map_first(list.reverse)
+  |> pair.map_second(list.reverse)
 }
 
 fn do_find_delete(
